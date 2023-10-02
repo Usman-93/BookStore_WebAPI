@@ -4,7 +4,6 @@ namespace BookStore_WebAPI.EndPoints
 {
     public static class BooksEndPoints
     {
-
         const string GetBookEndPointName = "GetBook";
 
         static List<Book> books = new List<Book>()

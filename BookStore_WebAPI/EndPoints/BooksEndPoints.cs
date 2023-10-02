@@ -1,4 +1,5 @@
 ﻿using BookStore_WebAPI.Entities;
+using BookStore_WebAPI.Respositories;
 
 namespace BookStore_WebAPI.EndPoints
 {
@@ -6,27 +7,10 @@ namespace BookStore_WebAPI.EndPoints
     {
         const string GetBookEndPointName = "GetBook";
 
-        static List<Book> books = new List<Book>()
-            {
-                new Book()
-                {
-                    Id = 1,
-                    Title = "Designing Data-Intensive Applications",
-                    Author = "Martin Kleppmann",
-                    Price = 150,
-                    publishedYear = 2016
-                },
-                new Book()
-                {
-                    Id = 2,
-                    Title = "Fundamentals of Data Engineering",
-                    Author = "Joe Reis",
-                    Price = 100,
-                    publishedYear = 2022
-                }
-            };
         public static RouteGroupBuilder MapBooksEndPoints(this IEndpointRouteBuilder routes)
         {
+            InMemBooksRepository booksRepository = new InMemBooksRepository();
+
             var group = routes.MapGroup("/books")
                               .WithParameterValidation();
 
@@ -34,12 +18,12 @@ namespace BookStore_WebAPI.EndPoints
             //app.MapGet("/", () => "Hello World!");
 
             // Get all books
-            group.MapGet("/", () => books);
+            group.MapGet("/", () => booksRepository.GetAll());
 
             // Get a book by Id
             group.MapGet("/{id}", (int id) =>
             {
-                Book book = books.Find((book) => book.Id == id);
+                Book book = booksRepository.Get(id);
                 if (book is null)
                 {
                     return Results.NotFound();
@@ -52,8 +36,7 @@ namespace BookStore_WebAPI.EndPoints
             // Post a book
             group.MapPost("/", (Book book) =>
             {
-                book.Id = books.Max(book => book.Id) + 1;
-                books.Add(book);
+                booksRepository.Create(book);
 
                 return Results.CreatedAtRoute(GetBookEndPointName, new { id = book.Id }, book);
             }
@@ -63,7 +46,7 @@ namespace BookStore_WebAPI.EndPoints
             // Put/Update a book
             group.MapPut("/{id}", (int id, Book updatedBook) =>
             {
-                Book existingBook = books.Find((book) => book.Id == id);
+                Book existingBook = booksRepository.Get(id);
 
                 if (existingBook is null)
                 {
@@ -75,6 +58,8 @@ namespace BookStore_WebAPI.EndPoints
                 existingBook.publishedYear = updatedBook.publishedYear;
                 existingBook.Price = updatedBook.Price;
 
+                booksRepository.Update(existingBook);
+
                 return Results.NotFound();
             }
             );
@@ -82,11 +67,11 @@ namespace BookStore_WebAPI.EndPoints
             // Delete a book
             group.MapDelete("/{id}", (int id) =>
             {
-                Book book = books.Find(book => book.Id == id);
+                Book book = booksRepository.Get(id);
 
                 if (book is not null)
                 {
-                    books.Remove(book);
+                    booksRepository.Delete(book.Id);
                 }
 
                 return Results.NoContent();

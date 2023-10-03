@@ -2,7 +2,7 @@
 
 namespace BookStore_WebAPI.Respositories
 {
-    public class InMemBooksRepository
+    public class InMemBooksRepository : IBooksRepository
     {
 
         private List<Book> books = new List<Book>()
@@ -52,7 +52,7 @@ namespace BookStore_WebAPI.Respositories
         }
 
         // Delete a book
-        public void Delete(int id) 
+        public void Delete(int id)
         {
             Book book = books.Find(book => book.Id == id);
             books.Remove(book);

@@ -9,7 +9,7 @@ namespace BookStore_WebAPI.EndPoints
 
         public static RouteGroupBuilder MapBooksEndPoints(this IEndpointRouteBuilder routes)
         {
-            InMemBooksRepository booksRepository = new InMemBooksRepository();
+            //InMemBooksRepository booksRepository = new InMemBooksRepository();
 
             var group = routes.MapGroup("/books")
                               .WithParameterValidation();
@@ -18,10 +18,10 @@ namespace BookStore_WebAPI.EndPoints
             //app.MapGet("/", () => "Hello World!");
 
             // Get all books
-            group.MapGet("/", () => booksRepository.GetAll());
+            group.MapGet("/", (IBooksRepository booksRepository) => booksRepository.GetAll());
 
             // Get a book by Id
-            group.MapGet("/{id}", (int id) =>
+            group.MapGet("/{id}", (IBooksRepository booksRepository, int id) =>
             {
                 Book book = booksRepository.Get(id);
                 if (book is null)
@@ -34,7 +34,7 @@ namespace BookStore_WebAPI.EndPoints
             ).WithName(GetBookEndPointName);
 
             // Post a book
-            group.MapPost("/", (Book book) =>
+            group.MapPost("/", (IBooksRepository booksRepository, Book book) =>
             {
                 booksRepository.Create(book);
 
@@ -44,7 +44,7 @@ namespace BookStore_WebAPI.EndPoints
             );
 
             // Put/Update a book
-            group.MapPut("/{id}", (int id, Book updatedBook) =>
+            group.MapPut("/{id}", (IBooksRepository booksRepository, int id, Book updatedBook) =>
             {
                 Book existingBook = booksRepository.Get(id);
 
@@ -65,7 +65,7 @@ namespace BookStore_WebAPI.EndPoints
             );
 
             // Delete a book
-            group.MapDelete("/{id}", (int id) =>
+            group.MapDelete("/{id}", (IBooksRepository booksRepository, int id) =>
             {
                 Book book = booksRepository.Get(id);
 
